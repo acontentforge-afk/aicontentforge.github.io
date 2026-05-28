@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Content Forge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #050816;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .bg-glow {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0,255,255,0.2), transparent 70%);
+      filter: blur(50px);
+      z-index: -1;
+    }
+
+    .glow1 {
+      top: -100px;
+      left: -100px;
+    }
+
+    .glow2 {
+      bottom: -150px;
+      right: -100px;
+      background: radial-gradient(circle, rgba(140,0,255,0.2), transparent 70%);
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 18px 8%;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: cyan;
+    }
+
+    nav a {
+      margin-left: 25px;
+      color: white;
+      text-decoration: none;
+      transition: 0.3s;
+      font-size: 15px;
+    }
+
+    nav a:hover {
+      color: cyan;
+    }
+
+    section {
+      padding: 120px 8%;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .hero-text h1 {
+      font-size: 64px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero-text h1 span {
+      color: cyan;
+    }
+
+    .hero-text p {
+      color: #c7c7c7;
+      margin-bottom: 30px;
+      line-height: 1.7;
+      max-width: 600px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 30px;
+      background: linear-gradient(45deg, cyan, #7f5cff);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: 0.3s;
+      box-shadow: 0 0 20px rgba(0,255,255,0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.03);
+    }
+
+    .hero-card {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 0 40px rgba(0,255,255,0.08);
+    }
+
+    .code-box {
+      background: #0f172a;
+      border-radius: 18px;
+      padding: 20px;
+      color: #00ffcc;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 42px;
+      margin-bottom: 60px;
+    }
+
+    .section-title span {
+      color: cyan;
+    }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 30px;
+    }
+
+    .service-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 35px;
+      border-radius: 22px;
+      transition: 0.4s;
+      backdrop-filter: blur(14px);
+    }
+
+    .service-card:hover {
+      transform: translateY(-10px);
+      border-color: cyan;
+      box-shadow: 0 0 30px rgba(0,255,255,0.12);
+    }
+
+    .service-card h3 {
+      margin: 20px 0 10px;
+      color: cyan;
+    }
+
+    .service-card p {
+      color: #c7c7c7;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+    }
+
+    .portfolio-item {
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .portfolio-item img {
+      width: 100%;
+      display: block;
+      height: 240px;
+      object-fit: cover;
+    }
+
+    .portfolio-info {
+      padding: 20px;
+    }
+
+    .portfolio-info h4 {
+      margin-bottom: 10px;
+      color: cyan;
+    }
+
+    .contact-box {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 40px;
+      border-radius: 24px;
+      backdrop-filter: blur(15px);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    input, textarea {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 16px;
+      border-radius: 12px;
+      color: white;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 60px;
+    }
+
+    .typing {
+      color: cyan;
+      border-right: 2px solid cyan;
+      white-space: nowrap;
+      overflow: hidden;
+      display: inline-block;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        border-color: transparent;
+      }
+    }
+
+    @media(max-width: 900px) {
+      .hero-text h1 {
+        font-size: 46px;
+      }
+
+      header {
+        padding: 18px 5%;
+      }
+
+      section {
+        padding: 100px 5%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow glow1"></div>
+  <div class="bg-glow glow2"></div>
+
+  <header>
+    <div class="logo">AI Content Forge</div>
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#services">Services</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <div class="hero-text">
+      <h1>We Build <span>AI Websites</span><br> & Smart SaaS Apps</h1>
+
+      <p>
+        AI Content Forge helps businesses build futuristic AI-powered websites,
+        chatbots, automation systems, and modern SaaS platforms.
+      </p>
+
+      <a href="#contact" class="btn">Start Your Project</a>
+    </div>
+
+    <div class="hero-card">
+      <div class="code-box">
+<pre>
+const AIContentForge = {
+  services: [
+    "AI Chatbots",
+    "SaaS Apps",
+    "Web Development",
+    "Automation"
+  ],
+
+  status: "Building The Future"
+};
+</pre>
+      </div>
+
+      <br>
+
+      <h3>
+        <span class="typing" id="typing"></span>
+      </h3>
+    </div>
+  </section>
+
+  <section id="services">
+    <h2 class="section-title">Our <span>Services</span></h2>
+
+    <div class="services">
+      <div class="service-card">
+        <h3>AI Chatbots</h3>
+        <p>
+          Smart AI assistants for websites, customer support, and automation.
+        </p>
+      </div>
+
+      <div class="service-card">
+        <h3>Custom Websites</h3>
+        <p>
+          Modern, responsive, and animated websites built for brands and startups.
+        </p>
+      </div>
+
+      <div class="service-card">
+        <h3>AI SaaS Platforms</h3>
+        <p>
+          Build scalable AI-powered SaaS products with modern UI and backend systems.
+        </p>
+      </div>
+
+      <div class="service-card">
+        <h3>Automation Systems</h3>
+        <p>
+          Automate workflows, customer interactions, and business operations using AI.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio">
+    <h2 class="section-title">Featured <span>Projects</span></h2>
+
+    <div class="portfolio-grid">
+      <div class="portfolio-item">
+        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop" alt="project">
+
+        <div class="portfolio-info">
+          <h4>AI Chatbot SaaS</h4>
+          <p>Modern chatbot dashboard with AI image tools and automation.</p>
+        </div>
+      </div>
+
+      <div class="portfolio-item">
+        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=1200&auto=format&fit=crop" alt="project">
+
+        <div class="portfolio-info">
+          <h4>Business Website</h4>
+          <p>Responsive animated company website for a startup business.</p>
+        </div>
+      </div>
+
+      <div class="portfolio-item">
+        <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?q=80&w=1200&auto=format&fit=crop" alt="project">
+
+        <div class="portfolio-info">
+          <h4>AI Automation Tool</h4>
+          <p>AI workflow automation platform with smart integrations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2 class="section-title">Contact <span>Us</span></h2>
+
+    <div class="contact-box">
+      <form>
+        <input type="text" placeholder="Your Name">
+        <input type="email" placeholder="Your Email">
+        <textarea placeholder="Tell us about your project..."></textarea>
+
+        <button class="btn" type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 AI Content Forge — All Rights Reserved.
+  </footer>
+
+  <script>
+    const typing = document.getElementById('typing');
+
+    const texts = [
+      'AI Websites',
+      'AI Chatbots',
+      'Automation Systems',
+      'SaaS Platforms'
+    ];
+
+    let textIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+
+    function typeEffect() {
+      const current = texts[textIndex];
+
+      if (!deleting) {
+        typing.textContent = current.substring(0, charIndex++);
+
+        if (charIndex > current.length) {
+          deleting = true;
+          setTimeout(typeEffect, 1200);
+          return;
+        }
+      } else {
+        typing.textContent = current.substring(0, charIndex--);
+
+        if (charIndex < 0) {
+          deleting = false;
+          textIndex = (textIndex + 1) % texts.length;
+        }
+      }
+
+      setTimeout(typeEffect, deleting ? 50 : 100);
+    }
+
+    typeEffect();
+  </script>
+
+</body>
+</html>
