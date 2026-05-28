@@ -412,13 +412,33 @@ const AIContentForge = {
     <h2 class="section-title">Contact <span>Us</span></h2>
 
     <div class="contact-box">
-      <form>
-        <input type="text" placeholder="Your Name">
-        <input type="email" placeholder="Your Email">
-        <textarea placeholder="Tell us about your project..."></textarea>
+      <form action="https://formspree.io/f/xnjrwaqp" method="POST">
 
-        <button class="btn" type="submit">Send Message</button>
-      </form>
+<input 
+type="text" 
+name="name"
+placeholder="Your Name"
+required
+>
+
+<input 
+type="email"
+name="email"
+placeholder="Your Email"
+required
+>
+
+<textarea
+name="message"
+placeholder="Tell us about your project..."
+required
+></textarea>
+
+<button class="btn" type="submit">
+Send Message
+</button>
+
+</form>
     </div>
   </section>
 
