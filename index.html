@@ -1,490 +1,611 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI Content Forge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --c1:#00e5ff;--c2:#7c3aed;--c3:#f59e0b;
+      --bg:#06060f;--s1:rgba(255,255,255,0.03);--bd:rgba(255,255,255,0.08);
+      --t1:#f0f4ff;--t2:#94a3b8;--t3:#475569;
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+    #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+    /* ── NAV ── */
+    header{
+      position:fixed;top:0;width:100%;padding:16px 7%;
+      background:rgba(6,6,15,0.75);backdrop-filter:blur(28px);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      display:flex;justify-content:space-between;align-items:center;z-index:200;
+    }
+    .logo{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;
+      background:linear-gradient(90deg,var(--c1),#818cf8);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    nav a{margin-left:24px;color:var(--t3);text-decoration:none;font-size:13px;
+      font-weight:500;transition:color .2s}
+    nav a:hover{color:var(--t1)}
+
+    /* ── SECTIONS ── */
+    section{position:relative;z-index:1;padding:130px 7%}
+
+    /* ── HERO ── */
+    .hero{min-height:100vh;display:flex;align-items:center;gap:60px;flex-wrap:wrap;padding-top:100px}
+    .hero-left{flex:1;min-width:300px}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+      color:var(--c1);border:1px solid rgba(0,229,255,.22);padding:6px 14px;
+      border-radius:100px;margin-bottom:26px;background:rgba(0,229,255,.06);
+    }
+    .pill-dot{width:6px;height:6px;border-radius:50%;background:var(--c1);
+      box-shadow:0 0 10px var(--c1);animation:glow 2s ease-in-out infinite}
+    @keyframes glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.8)}}
+
+    .hero h1{font-family:'Syne',sans-serif;font-size:clamp(42px,6vw,78px);
+      line-height:1.02;font-weight:800;letter-spacing:-3px;margin-bottom:22px}
+    .hero h1 em{font-style:normal;
+      background:linear-gradient(120deg,var(--c1) 0%,#818cf8 50%,#f472b6 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero p{color:var(--t2);line-height:1.85;max-width:490px;margin-bottom:36px;font-size:15.5px}
+
+    .btn-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn-a{
+      display:inline-flex;align-items:center;gap:8px;padding:13px 26px;
+      background:linear-gradient(135deg,var(--c1),var(--c2));
+      color:#fff;font-weight:600;font-size:13px;text-decoration:none;
+      border-radius:10px;font-family:'Inter',sans-serif;border:none;cursor:pointer;
+      box-shadow:0 0 32px rgba(0,229,255,.28),0 8px 32px rgba(124,58,237,.35);
+      transition:transform .22s,box-shadow .22s;
+    }
+    .btn-a:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 50px rgba(0,229,255,.42),0 12px 40px rgba(124,58,237,.5)}
+    .btn-b{
+      display:inline-flex;align-items:center;gap:8px;padding:13px 26px;
+      border:1px solid rgba(255,255,255,.1);color:var(--t2);font-size:13px;
+      font-weight:500;text-decoration:none;border-radius:10px;
+      transition:border-color .2s,color .2s;
+    }
+    .btn-b:hover{border-color:rgba(0,229,255,.35);color:var(--c1)}
+
+    /* ── 3D HERO CARD ── */
+    .hero-right{flex:1;min-width:340px;perspective:1400px;position:relative}
+
+    .card-scene{transform-style:preserve-3d;position:relative}
+
+    .card-3d{
+      transform-style:preserve-3d;
+      transition:transform .06s linear;
+      border-radius:22px;
+      background:linear-gradient(160deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.02) 100%);
+      border:1px solid rgba(255,255,255,.1);
+      padding:26px;
+      box-shadow:
+        0 0 0 1px rgba(0,229,255,.07),
+        0 50px 120px rgba(0,0,0,.85),
+        0 24px 48px rgba(0,0,0,.7),
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -1px 0 rgba(0,0,0,.4);
+      position:relative;overflow:hidden;
+      backdrop-filter:blur(20px);
+    }
+    .card-3d::before{
+      content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,229,255,.8),rgba(129,140,248,.6),transparent);
+    }
+    /* inner face glow */
+    .card-3d::after{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background:radial-gradient(ellipse at 60% -20%,rgba(0,229,255,.08),transparent 60%);
     }
 
-    body {
-      background: #050816;
-      color: white;
-      overflow-x: hidden;
+    /* floating child layers with translateZ */
+    .c-top{transform:translateZ(18px)}
+    .c-mid{transform:translateZ(10px)}
+
+    .tbar{display:flex;gap:6px;align-items:center;margin-bottom:14px}
+    .d{width:10px;height:10px;border-radius:50%}
+    .dr{background:#ff453a;box-shadow:0 0 6px rgba(255,69,58,.6)}
+    .dy{background:#ffd60a;box-shadow:0 0 6px rgba(255,214,10,.6)}
+    .dg{background:#30d158;box-shadow:0 0 6px rgba(48,209,88,.6)}
+    .tfile{color:#1e293b;font-size:11px;margin-left:8px;font-family:'Inter',monospace}
+
+    .code-box{
+      background:rgba(0,0,0,.7);border-radius:12px;padding:18px;
+      font-family:'Courier New',monospace;font-size:12.5px;line-height:1.9;
+      border:1px solid rgba(255,255,255,.05);
+      box-shadow:inset 0 4px 24px rgba(0,0,0,.8),0 0 0 1px rgba(0,229,255,.04);
+    }
+    .ck{color:#a78bfa}.cs{color:#34d399}.cb{color:#38bdf8}.cc{color:var(--c1)}.cm{color:#1e3a4a}
+
+    .type-strip{
+      display:flex;align-items:center;gap:10px;margin-top:14px;
+      padding:11px 15px;background:rgba(0,0,0,.5);
+      border:1px solid rgba(0,229,255,.1);border-radius:8px;
+    }
+    .type-pre{color:#1e3a4a;font-family:'Courier New',monospace;font-size:11px}
+    .typing{color:var(--c1);font-family:'Courier New',monospace;font-size:13px;
+      border-right:2px solid var(--c1);animation:blink .75s infinite}
+    @keyframes blink{50%{border-color:transparent}}
+
+    /* reflection plane under card */
+    .card-shadow{
+      position:absolute;bottom:-28px;left:5%;right:5%;height:28px;
+      background:radial-gradient(ellipse,rgba(0,229,255,.14) 0%,transparent 75%);
+      filter:blur(10px);pointer-events:none;transform:translateZ(-10px);
     }
 
-    html {
-      scroll-behavior: smooth;
+    /* ── FLOATING 3D CHIPS around hero card ── */
+    .chip{
+      position:absolute;padding:8px 14px;border-radius:30px;
+      border:1px solid rgba(255,255,255,.1);font-size:11px;font-weight:600;
+      backdrop-filter:blur(12px);white-space:nowrap;pointer-events:none;
+      animation:float-chip ease-in-out infinite;
+    }
+    .chip-1{top:-18px;left:-14px;background:rgba(0,229,255,.12);color:var(--c1);border-color:rgba(0,229,255,.25);animation-duration:4s;animation-delay:0s}
+    .chip-2{top:30%;right:-22px;background:rgba(129,140,248,.12);color:#818cf8;border-color:rgba(129,140,248,.25);animation-duration:5s;animation-delay:1s}
+    .chip-3{bottom:10%;left:-20px;background:rgba(244,114,182,.1);color:#f472b6;border-color:rgba(244,114,182,.22);animation-duration:4.5s;animation-delay:.5s}
+    @keyframes float-chip{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+    /* ── SECTION TITLES ── */
+    .stag{text-align:center;font-size:10px;font-weight:700;letter-spacing:3px;
+      text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+    .stitle{font-family:'Syne',sans-serif;text-align:center;
+      font-size:clamp(30px,4vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:60px}
+    .stitle span{background:linear-gradient(120deg,var(--c1),#818cf8);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+    /* ── SERVICES ── */
+    .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:20px}
+
+    .svc{
+      position:relative;padding:34px 28px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.07);
+      background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));
+      backdrop-filter:blur(16px);overflow:hidden;cursor:default;
+      transform-style:preserve-3d;
+      box-shadow:0 24px 64px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.08);
+      transition:border-color .3s,box-shadow .3s;
+    }
+    .svc::before{
+      content:'';position:absolute;top:0;left:25%;right:25%;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);
+      transition:background .35s;
+    }
+    .svc-glow{
+      position:absolute;bottom:-80px;right:-80px;width:160px;height:160px;border-radius:50%;
+      opacity:0;transition:opacity .4s,transform .4s;
+    }
+    .svc:hover{border-color:rgba(0,229,255,.18);
+      box-shadow:0 40px 100px rgba(0,0,0,.8),0 0 50px rgba(0,229,255,.07),inset 0 1px 0 rgba(0,229,255,.15)}
+    .svc:hover .svc-glow{opacity:1;transform:scale(1.5)}
+    .svc:hover::before{background:linear-gradient(90deg,transparent,rgba(0,229,255,.32),transparent)}
+
+    .svc-ico{
+      width:52px;height:52px;border-radius:14px;margin-bottom:20px;
+      display:flex;align-items:center;justify-content:center;font-size:22px;
+      background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 12px rgba(0,229,255,.06);
+    }
+    .svc h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;
+      margin-bottom:10px;color:var(--t1);letter-spacing:-.3px}
+    .svc p{color:var(--t3);font-size:13.5px;line-height:1.75}
+
+    /* ── PORTFOLIO ── */
+    .port-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}
+    .port{
+      border-radius:18px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.07);
+      background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+      transform-style:preserve-3d;
+      box-shadow:0 24px 64px rgba(0,0,0,.7);
+      transition:box-shadow .35s;
+    }
+    .port:hover{box-shadow:0 50px 110px rgba(0,0,0,.9),0 0 60px rgba(124,58,237,.12)}
+    .port-img{position:relative;overflow:hidden;height:210px}
+    .port-img img{width:100%;height:100%;object-fit:cover;display:block;
+      transition:transform .6s;filter:brightness(.75) saturate(.85)}
+    .port:hover .port-img img{transform:scale(1.07);filter:brightness(.95) saturate(1)}
+    .port-ov{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 25%,rgba(6,6,15,1))}
+    .port-badge{
+      position:absolute;top:12px;right:12px;font-size:9px;font-weight:700;
+      letter-spacing:2px;text-transform:uppercase;padding:4px 10px;
+      border-radius:100px;background:rgba(0,0,0,.65);
+      border:1px solid rgba(0,229,255,.22);color:var(--c1);backdrop-filter:blur(8px);
+    }
+    .port-info{padding:20px 22px}
+    .port-info h4{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+      margin-bottom:7px;color:var(--t1);letter-spacing:-.3px}
+    .port-info p{color:var(--t3);font-size:13px;line-height:1.65}
+
+    /* ── CONTACT ── */
+    .cbox{
+      max-width:650px;margin:auto;
+      background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:44px;
+      box-shadow:0 60px 140px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.1);
+      position:relative;overflow:hidden;backdrop-filter:blur(20px);
+    }
+    .cbox::before{
+      content:'';position:absolute;top:0;left:15%;right:15%;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,229,255,.55),rgba(129,140,248,.4),transparent);
+    }
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:540px){.frow{grid-template-columns:1fr}}
+    .fld{display:flex;flex-direction:column;gap:7px}
+    .fld label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase}
+    .fld input,.fld textarea{
+      background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.07);
+      padding:13px 15px;border-radius:9px;color:var(--t1);
+      font-family:'Inter',sans-serif;font-size:13px;outline:none;
+      transition:border-color .22s,box-shadow .22s;
+    }
+    .fld input:focus,.fld textarea:focus{
+      border-color:rgba(0,229,255,.3);box-shadow:0 0 0 3px rgba(0,229,255,.07)}
+    .fld textarea{resize:vertical;min-height:120px}
+    .fstack{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+
+    /* ── PARTICLES ── */
+    .pts{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .pt{position:absolute;border-radius:50%;opacity:0;animation:fup linear infinite}
+    @keyframes fup{
+      0%{transform:translateY(100vh) scale(0);opacity:0}
+      10%{opacity:.7}90%{opacity:.15}
+      100%{transform:translateY(-5vh) scale(1.2);opacity:0}
     }
 
-    .bg-glow {
-      position: fixed;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(0,255,255,0.2), transparent 70%);
-      filter: blur(50px);
-      z-index: -1;
-    }
+    /* ── DIVIDER ── */
+    .div{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);position:relative;z-index:1;margin:0 7%}
 
-    .glow1 {
-      top: -100px;
-      left: -100px;
-    }
+    /* ── REVEAL ── */
+    .rv{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
+    .rv.on{opacity:1;transform:none}
 
-    .glow2 {
-      bottom: -150px;
-      right: -100px;
-      background: radial-gradient(circle, rgba(140,0,255,0.2), transparent 70%);
-    }
+    footer{text-align:center;padding:34px 20px;color:var(--t3);font-size:12px;
+      border-top:1px solid rgba(255,255,255,.05);position:relative;z-index:1}
+    footer em{font-style:normal;color:var(--t2)}
 
-    header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      padding: 18px 8%;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(15px);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .logo {
-      font-size: 28px;
-      font-weight: 700;
-      color: cyan;
-    }
-
-    nav a {
-      margin-left: 25px;
-      color: white;
-      text-decoration: none;
-      transition: 0.3s;
-      font-size: 15px;
-    }
-
-    nav a:hover {
-      color: cyan;
-    }
-
-    section {
-      padding: 120px 8%;
-    }
-
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 60px;
-      flex-wrap: wrap;
-    }
-
-    .hero-text {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .hero-text h1 {
-      font-size: 64px;
-      line-height: 1.1;
-      margin-bottom: 20px;
-    }
-
-    .hero-text h1 span {
-      color: cyan;
-    }
-
-    .hero-text p {
-      color: #c7c7c7;
-      margin-bottom: 30px;
-      line-height: 1.7;
-      max-width: 600px;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 14px 30px;
-      background: linear-gradient(45deg, cyan, #7f5cff);
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-      font-weight: 600;
-      transition: 0.3s;
-      box-shadow: 0 0 20px rgba(0,255,255,0.4);
-    }
-
-    .btn:hover {
-      transform: translateY(-3px) scale(1.03);
-    }
-
-    .hero-card {
-      flex: 1;
-      min-width: 300px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      padding: 30px;
-      box-shadow: 0 0 40px rgba(0,255,255,0.08);
-    }
-
-    .code-box {
-      background: #0f172a;
-      border-radius: 18px;
-      padding: 20px;
-      color: #00ffcc;
-      font-size: 14px;
-      overflow-x: auto;
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 42px;
-      margin-bottom: 60px;
-    }
-
-    .section-title span {
-      color: cyan;
-    }
-
-    .services {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 30px;
-    }
-
-    .service-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 35px;
-      border-radius: 22px;
-      transition: 0.4s;
-      backdrop-filter: blur(14px);
-    }
-
-    .service-card:hover {
-      transform: translateY(-10px);
-      border-color: cyan;
-      box-shadow: 0 0 30px rgba(0,255,255,0.12);
-    }
-
-    .service-card h3 {
-      margin: 20px 0 10px;
-      color: cyan;
-    }
-
-    .service-card p {
-      color: #c7c7c7;
-      line-height: 1.7;
-      font-size: 14px;
-    }
-
-    .portfolio-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-    }
-
-    .portfolio-item {
-      border-radius: 22px;
-      overflow: hidden;
-      position: relative;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .portfolio-item img {
-      width: 100%;
-      display: block;
-      height: 240px;
-      object-fit: cover;
-    }
-
-    .portfolio-info {
-      padding: 20px;
-    }
-
-    .portfolio-info h4 {
-      margin-bottom: 10px;
-      color: cyan;
-    }
-
-    .contact-box {
-      max-width: 700px;
-      margin: auto;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 40px;
-      border-radius: 24px;
-      backdrop-filter: blur(15px);
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    input, textarea {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 16px;
-      border-radius: 12px;
-      color: white;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 140px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 40px 20px;
-      color: #999;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      margin-top: 60px;
-    }
-
-    .typing {
-      color: cyan;
-      border-right: 2px solid cyan;
-      white-space: nowrap;
-      overflow: hidden;
-      display: inline-block;
-      animation: blink 0.8s infinite;
-    }
-
-    @keyframes blink {
-      50% {
-        border-color: transparent;
-      }
-    }
-
-    @media(max-width: 900px) {
-      .hero-text h1 {
-        font-size: 46px;
-      }
-
-      header {
-        padding: 18px 5%;
-      }
-
-      section {
-        padding: 100px 5%;
-      }
-    }
+    @media(max-width:768px){header nav{display:none}section{padding:100px 5%}}
   </style>
 </head>
 <body>
 
-  <div class="bg-glow glow1"></div>
-  <div class="bg-glow glow2"></div>
+<canvas id="bg-canvas"></canvas>
+<div class="pts" id="pts"></div>
 
-  <header>
-    <div class="logo">AI Content Forge</div>
+<header>
+  <div class="logo">AI Content Forge</div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#services">Services</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
 
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#services">Services</a>
-      <a href="#portfolio">Portfolio</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
-
-  <section class="hero" id="home">
-    <div class="hero-text">
-      <h1>We Build <span>AI Websites</span><br> & Smart SaaS Apps</h1>
-
-      <p>
-        AI Content Forge helps businesses build futuristic AI-powered websites,
-        chatbots, automation systems, and modern SaaS platforms.
-      </p>
-
-      <a href="#contact" class="btn">Start Your Project</a>
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-left rv">
+    <div class="pill"><div class="pill-dot"></div>AI-Powered Dev Studio</div>
+    <h1>We Forge<br><em>AI Websites</em><br>&amp; Smart SaaS</h1>
+    <p>Precision-engineered AI tools, chatbots, and automation platforms that scale with your business — from MVP to millions of users.</p>
+    <div class="btn-row">
+      <a href="#contact" class="btn-a">Start Your Project →</a>
+      <a href="#portfolio" class="btn-b">View Work</a>
     </div>
+  </div>
 
-    <div class="hero-card">
-      <div class="code-box">
-<pre>
-const AIContentForge = {
-  services: [
-    "AI Chatbots",
-    "SaaS Apps",
-    "Web Development",
-    "Automation"
-  ],
+  <div class="hero-right rv" style="transition-delay:.15s">
+    <div class="card-scene">
+      <!-- floating chips -->
+      <div class="chip chip-1">⚡ AI Powered</div>
+      <div class="chip chip-2">🚀 Production Ready</div>
+      <div class="chip chip-3">🤖 Smart Automation</div>
 
-  status: "Building The Future"
-};
-</pre>
-      </div>
-
-      <br>
-
-      <h3>
-        <span class="typing" id="typing"></span>
-      </h3>
-    </div>
-  </section>
-
-  <section id="services">
-    <h2 class="section-title">Our <span>Services</span></h2>
-
-    <div class="services">
-      <div class="service-card">
-        <h3>AI Chatbots</h3>
-        <p>
-          Smart AI assistants for websites, customer support, and automation.
-        </p>
-      </div>
-
-      <div class="service-card">
-        <h3>Custom Websites</h3>
-        <p>
-          Modern, responsive, and animated websites built for brands and startups.
-        </p>
-      </div>
-
-      <div class="service-card">
-        <h3>AI SaaS Platforms</h3>
-        <p>
-          Build scalable AI-powered SaaS products with modern UI and backend systems.
-        </p>
-      </div>
-
-      <div class="service-card">
-        <h3>Automation Systems</h3>
-        <p>
-          Automate workflows, customer interactions, and business operations using AI.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="portfolio">
-    <h2 class="section-title">Featured <span>Projects</span></h2>
-
-    <div class="portfolio-grid">
-      <div class="portfolio-item">
-        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop" alt="project">
-
-        <div class="portfolio-info">
-          <h4>AI Chatbot SaaS</h4>
-          <p>Modern chatbot dashboard with AI image tools and automation.</p>
+      <div class="card-3d" id="tc">
+        <div class="tbar c-top">
+          <div class="d dr"></div><div class="d dy"></div><div class="d dg"></div>
+          <span class="tfile">forge.config.js</span>
+        </div>
+        <div class="code-box c-mid">
+          <span class="cm">// AI Content Forge — v3</span><br>
+          <span class="cb">const</span> <span class="ck">forge</span> <span style="color:#1e3a4a">=</span> <span class="cb">{</span><br>
+          &nbsp;&nbsp;<span class="ck">services</span><span style="color:#1e3a4a">:</span> <span class="cb">[</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cs">"AI Chatbots"</span><span style="color:#1e3a4a">,</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cs">"SaaS Platforms"</span><span style="color:#1e3a4a">,</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cs">"Web Development"</span><span style="color:#1e3a4a">,</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="cs">"Automation"</span><br>
+          &nbsp;&nbsp;<span class="cb">]</span><span style="color:#1e3a4a">,</span><br>
+          &nbsp;&nbsp;<span class="ck">mode</span><span style="color:#1e3a4a">:</span> <span class="cs">"production"</span><span style="color:#1e3a4a">,</span><br>
+          &nbsp;&nbsp;<span class="ck">status</span><span style="color:#1e3a4a">:</span> <span class="cc">"Building Future ✦"</span><br>
+          <span class="cb">}</span>
+        </div>
+        <div class="type-strip c-top">
+          <span class="type-pre">▶</span>
+          <span class="typing" id="typing"></span>
         </div>
       </div>
+      <div class="card-shadow"></div>
+    </div>
+  </div>
+</section>
 
-      <div class="portfolio-item">
-        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=1200&auto=format&fit=crop" alt="project">
+<div class="div"></div>
 
-        <div class="portfolio-info">
-          <h4>Business Website</h4>
-          <p>Responsive animated company website for a startup business.</p>
-        </div>
+<!-- SERVICES -->
+<section id="services">
+  <p class="stag rv">What We Do</p>
+  <h2 class="stitle rv">Our <span>Services</span></h2>
+  <div class="svc-grid">
+    <div class="svc rv">
+      <div class="svc-glow" style="background:radial-gradient(circle,rgba(0,229,255,.15),transparent 70%)"></div>
+      <div class="svc-ico">🤖</div>
+      <h3>AI Chatbots</h3>
+      <p>Intelligent conversational assistants trained on your data — for support, sales, and lead qualification.</p>
+    </div>
+    <div class="svc rv" style="transition-delay:.08s">
+      <div class="svc-glow" style="background:radial-gradient(circle,rgba(129,140,248,.15),transparent 70%)"></div>
+      <div class="svc-ico">🌐</div>
+      <h3>Custom Websites</h3>
+      <p>Visually stunning, performance-first sites and landing pages built for conversion and brand impact.</p>
+    </div>
+    <div class="svc rv" style="transition-delay:.16s">
+      <div class="svc-glow" style="background:radial-gradient(circle,rgba(244,114,182,.12),transparent 70%)"></div>
+      <div class="svc-ico">🚀</div>
+      <h3>AI SaaS Platforms</h3>
+      <p>End-to-end product engineering — from UI to backend — for scalable, AI-native software products.</p>
+    </div>
+    <div class="svc rv" style="transition-delay:.24s">
+      <div class="svc-glow" style="background:radial-gradient(circle,rgba(245,158,11,.12),transparent 70%)"></div>
+      <div class="svc-ico">⚙️</div>
+      <h3>Automation Systems</h3>
+      <p>Eliminate repetitive workflows. We wire AI into your ops stack to save time and cut costs.</p>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <p class="stag rv">What We've Built</p>
+  <h2 class="stitle rv">Featured <span>Projects</span></h2>
+  <div class="port-grid">
+    <div class="port rv">
+      <div class="port-img">
+        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop" alt="AI Chatbot SaaS">
+        <div class="port-ov"></div>
+        <div class="port-badge">SaaS</div>
       </div>
-
-      <div class="portfolio-item">
-        <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?q=80&w=1200&auto=format&fit=crop" alt="project">
-
-        <div class="portfolio-info">
-          <h4>AI Automation Tool</h4>
-          <p>AI workflow automation platform with smart integrations.</p>
-        </div>
+      <div class="port-info">
+        <h4>AI Chatbot SaaS</h4>
+        <p>Multi-tenant chatbot platform with real-time analytics, knowledge base ingestion, and custom branding.</p>
       </div>
     </div>
-  </section>
-
-  <section id="contact">
-    <h2 class="section-title">Contact <span>Us</span></h2>
-
-    <div class="contact-box">
-      <form action="https://formspree.io/f/xnjrwaqp" method="POST">
-
-<input 
-type="text" 
-name="name"
-placeholder="Your Name"
-required
->
-
-<input 
-type="email"
-name="email"
-placeholder="Your Email"
-required
->
-
-<textarea
-name="message"
-placeholder="Tell us about your project..."
-required
-></textarea>
-
-<button class="btn" type="submit">
-Send Message
-</button>
-
-</form>
+    <div class="port rv" style="transition-delay:.1s">
+      <div class="port-img">
+        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=1200&auto=format&fit=crop" alt="Business Website">
+        <div class="port-ov"></div>
+        <div class="port-badge">Web</div>
+      </div>
+      <div class="port-info">
+        <h4>Startup Brand Site</h4>
+        <p>Animated, responsive website for a Series A startup — built for credibility and lead capture.</p>
+      </div>
     </div>
-  </section>
+    <div class="port rv" style="transition-delay:.2s">
+      <div class="port-img">
+        <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?q=80&w=1200&auto=format&fit=crop" alt="AI Automation Tool">
+        <div class="port-ov"></div>
+        <div class="port-badge">Automation</div>
+      </div>
+      <div class="port-info">
+        <h4>AI Workflow Engine</h4>
+        <p>Visual automation builder integrating AI, Notion, Slack, and CRM for an ops team of 50+.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <footer>
-    © 2026 AI Content Forge — All Rights Reserved.
-  </footer>
+<div class="div"></div>
 
-  <script>
-    const typing = document.getElementById('typing');
+<!-- CONTACT -->
+<section id="contact">
+  <p class="stag rv">Get In Touch</p>
+  <h2 class="stitle rv">Start Your <span>Project</span></h2>
+  <div class="cbox rv">
+    <form action="https://formspree.io/f/xnjrwaqp" method="POST">
+      <div class="frow">
+        <div class="fld"><label>Your Name</label><input type="text" name="name" placeholder="John Doe" required></div>
+        <div class="fld"><label>Email</label><input type="email" name="email" placeholder="john@company.com" required></div>
+      </div>
+      <div class="fstack">
+        <div class="fld"><label>Message</label><textarea name="message" placeholder="Tell us about your project — scope, timeline, budget..." required></textarea></div>
+        <button type="submit" class="btn-a" style="width:fit-content">Send Message →</button>
+      </div>
+    </form>
+  </div>
+</section>
 
-    const texts = [
-      'AI Websites',
-      'AI Chatbots',
-      'Automation Systems',
-      'SaaS Platforms'
-    ];
+<footer>© 2026 <em>AI Content Forge</em> — All Rights Reserved.</footer>
 
-    let textIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
+<script>
+/* TYPING */
+const tel=document.getElementById('typing');
+const txts=['AI Websites','AI Chatbots','SaaS Platforms','Automation Tools'];
+let ti=0,ci=0,del=false;
+function type(){
+  const c=txts[ti];
+  tel.textContent=del?c.substring(0,ci--):c.substring(0,ci++);
+  if(!del&&ci>c.length){del=true;setTimeout(type,1400);return}
+  if(del&&ci<0){del=false;ti=(ti+1)%txts.length}
+  setTimeout(type,del?40:85);
+}
+type();
 
-    function typeEffect() {
-      const current = texts[textIndex];
+/* REVEAL */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}}),{threshold:.08});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 
-      if (!deleting) {
-        typing.textContent = current.substring(0, charIndex++);
+/* HERO CARD TILT — smooth with lerp */
+const tc=document.getElementById('tc');
+const tcWrap=tc.parentElement.parentElement;
+let tx=0,ty=0,cx=0,cy=0;
+tcWrap.addEventListener('mousemove',e=>{
+  const r=tcWrap.getBoundingClientRect();
+  tx=(e.clientX-r.left)/r.width-.5;
+  ty=(e.clientY-r.top)/r.height-.5;
+});
+tcWrap.addEventListener('mouseleave',()=>{tx=0;ty=0});
+function lerpCard(){
+  cx+=(tx-cx)*.1;cy+=(ty-cy)*.1;
+  tc.style.transform=`rotateY(${cx*26}deg) rotateX(${-cy*20}deg) translateZ(14px)`;
+  requestAnimationFrame(lerpCard);
+}
+lerpCard();
 
-        if (charIndex > current.length) {
-          deleting = true;
-          setTimeout(typeEffect, 1200);
-          return;
-        }
-      } else {
-        typing.textContent = current.substring(0, charIndex--);
+/* SERVICE CARD TILT */
+document.querySelectorAll('.svc').forEach(c=>{
+  let sx=0,sy=0,scx=0,scy=0;
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    sx=(e.clientX-r.left)/r.width-.5;
+    sy=(e.clientY-r.top)/r.height-.5;
+  });
+  c.addEventListener('mouseleave',()=>{sx=0;sy=0});
+  function lSvc(){
+    scx+=(sx-scx)*.12;scy+=(sy-scy)*.12;
+    c.style.transform=`translateY(${scx||scy?-12:0}px) rotateY(${scx*12}deg) rotateX(${-scy*10}deg)`;
+    requestAnimationFrame(lSvc);
+  }
+  lSvc();
+});
 
-        if (charIndex < 0) {
-          deleting = false;
-          textIndex = (textIndex + 1) % texts.length;
-        }
+/* PORTFOLIO CARD TILT */
+document.querySelectorAll('.port').forEach(c=>{
+  let px=0,py=0,pcx=0,pcy=0;
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    px=(e.clientX-r.left)/r.width-.5;py=(e.clientY-r.top)/r.height-.5;
+  });
+  c.addEventListener('mouseleave',()=>{px=0;py=0});
+  function lPort(){
+    pcx+=(px-pcx)*.12;pcy+=(py-pcy)*.12;
+    c.style.transform=`translateY(${pcx||pcy?-10:0}px) rotateY(${pcx*10}deg) rotateX(${-pcy*8}deg)`;
+    requestAnimationFrame(lPort);
+  }
+  lPort();
+});
+
+/* WEBGL BACKGROUND */
+const canvas=document.getElementById('bg-canvas');
+const gl=canvas.getContext('webgl');
+
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;if(gl)gl.viewport(0,0,canvas.width,canvas.height)}
+resize();window.addEventListener('resize',resize);
+
+if(gl){
+  const VS=`attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const FS=`
+    precision mediump float;
+    uniform float t;uniform vec2 res;uniform vec2 mouse;
+    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    float noise(vec2 p){
+      vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+    }
+    float fbm(vec2 p){return noise(p)*.5+noise(p*2.)*.25+noise(p*4.)*.125;}
+
+    void main(){
+      vec2 uv=(gl_FragCoord.xy/res)*2.-1.;uv.x*=res.x/res.y;
+      vec2 m=(mouse/res)*2.-1.;m.x*=res.x/res.y;
+
+      /* deep space base */
+      vec3 col=vec3(.02,.02,.06);
+
+      /* flowing nebula */
+      float nb=fbm(uv*1.4+vec2(t*.06,t*.04));
+      float nb2=fbm(uv*2.+vec2(-t*.05,t*.07)+nb*.3);
+      vec3 neb1=vec3(.0,.45,.7)*nb*.35;
+      vec3 neb2=vec3(.3,.1,.7)*nb2*.25;
+      col+=neb1+neb2;
+
+      /* perspective grid scrolling toward viewer */
+      vec2 gv=fract(uv*5.+vec2(0,t*.12));
+      float gx=smoothstep(.94,1.,gv.x)+smoothstep(.94,1.,1.-gv.x);
+      float gy=smoothstep(.94,1.,gv.y)+smoothstep(.94,1.,1.-gv.y);
+      float g=max(gx,gy)*(1.-smoothstep(.0,1.2,length(uv))*.8);
+      col+=vec3(.0,.6,.85)*g*.22;
+
+      /* stars */
+      for(int i=0;i<3;i++){
+        float fi=float(i);
+        vec2 sv=uv*mix(8.,20.,fi*.3)+vec2(t*(.01+fi*.008));
+        vec2 si=floor(sv);
+        float star=hash(si+fi*17.3);
+        float bri=pow(max(0.,1.-length(fract(sv)-.5)*4.),2.)*step(.97,star);
+        col+=vec3(.6,.75,1.)*bri*(.5+.5*sin(t*2.+star*6.));
       }
 
-      setTimeout(typeEffect, deleting ? 50 : 100);
+      /* mouse proximity glow — warm cyan */
+      float md=length(uv-m);
+      float mg=pow(max(0.,1.-md*.8),3.);
+      col+=vec3(.0,.55,.9)*mg*.4;
+
+      /* corner accent glows */
+      col+=vec3(.1,.0,.4)*pow(max(0.,1.-length(uv-vec2(-1.3,.9))*.7),2.)*.5;
+      col+=vec3(.0,.3,.5)*pow(max(0.,1.-length(uv-vec2(1.4,-1.))*.7),2.)*.4;
+
+      /* vignette */
+      float v=1.-dot(uv*.48,uv*.48);
+      col*=max(0.,v)*max(0.,v);
+
+      gl_FragColor=vec4(clamp(col,0.,1.),1.);
     }
+  `;
 
-    typeEffect();
-  </script>
+  function mksh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mksh(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mksh(gl.FRAGMENT_SHADER,FS));
+  gl.linkProgram(prog);gl.useProgram(prog);
 
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pl=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(pl);
+  gl.vertexAttribPointer(pl,2,gl.FLOAT,false,0,0);
+
+  const uT=gl.getUniformLocation(prog,'t'),uR=gl.getUniformLocation(prog,'res'),uM=gl.getUniformLocation(prog,'mouse');
+  let mx=canvas.width/2,my=canvas.height/2;
+  window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+
+  let st=null;
+  function draw(ts){
+    if(!st)st=ts;
+    gl.uniform1f(uT,(ts-st)/1000);
+    gl.uniform2f(uR,canvas.width,canvas.height);
+    gl.uniform2f(uM,mx,canvas.height-my);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+}
+
+/* PARTICLES */
+const pc=document.getElementById('pts');
+const pcols=['#00e5ff','#818cf8','#f472b6','#34d399'];
+for(let i=0;i<28;i++){
+  const p=document.createElement('div');p.className='pt';
+  const sz=Math.random()*2.5+.5,col=pcols[Math.floor(Math.random()*pcols.length)];
+  p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${col};box-shadow:0 0 ${sz*5}px ${col};animation-duration:${Math.random()*14+9}s;animation-delay:${Math.random()*12}s;`;
+  pc.appendChild(p);
+}
+</script>
 </body>
 </html>
