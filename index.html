@@ -266,7 +266,66 @@
     /* ── REVEAL ── */
     .rv{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
     .rv.on{opacity:1;transform:none}
+    .social-contact{
+display:flex;
+justify-content:center;
+gap:25px;
+margin-top:40px;
+flex-wrap:wrap;
+}
 
+.social-card{
+width:320px;
+padding:30px;
+border-radius:24px;
+text-decoration:none;
+color:white;
+
+background:
+linear-gradient(
+145deg,
+rgba(255,255,255,.05),
+rgba(255,255,255,.02)
+);
+
+border:1px solid rgba(255,255,255,.08);
+
+backdrop-filter:blur(25px);
+
+transition:.4s;
+
+box-shadow:
+0 20px 50px rgba(0,0,0,.4);
+
+transform-style:preserve-3d;
+}
+
+.social-card:hover{
+
+transform:
+translateY(-12px)
+rotateX(6deg)
+rotateY(-6deg);
+
+box-shadow:
+0 0 40px rgba(0,229,255,.3),
+0 25px 80px rgba(0,0,0,.5);
+}
+
+.social-icon{
+font-size:42px;
+margin-bottom:15px;
+}
+
+.social-card h3{
+font-family:'Syne',sans-serif;
+margin-bottom:10px;
+}
+
+.social-card p{
+color:#94a3b8;
+word-break:break-word;
+}
     footer{text-align:center;padding:34px 20px;color:var(--t3);font-size:12px;
       border-top:1px solid rgba(255,255,255,.05);position:relative;z-index:1}
     footer em{font-style:normal;color:var(--t2)}
@@ -283,9 +342,10 @@
   <div class="logo">AI Content Forge</div>
   <nav>
     <a href="#home">Home</a>
-    <a href="#services">Services</a>
+    <a href="/service">Services</a>
     <a href="#portfolio">Portfolio</a>
     <a href="#contact">Contact</a>
+    <a href="/admin">Admin</a>
   </nav>
 </header>
 
@@ -430,7 +490,37 @@
         <button type="submit" class="btn-a" style="width:fit-content">Send Message →</button>
       </div>
     </form>
-  </div>
+</div>
+
+<div class="social-contact">
+
+  <a
+  href="mailto:acontentforge@gmail.com"
+  class="social-card">
+
+      <div class="social-icon">📧</div>
+
+      <h3>Email Us</h3>
+
+      <p>acontentforge@gmail.com</p>
+
+  </a>
+
+  <a
+  href="https://www.instagram.com/ai_contentforge/"
+  target="_blank"
+  class="social-card">
+
+      <div class="social-icon">📸</div>
+
+      <h3>Instagram</h3>
+
+      <p>@ai_contentforge</p>
+
+  </a>
+
+</div>
+
 </section>
 
 <footer>© 2026 <em>AI Content Forge</em> — All Rights Reserved.</footer>
